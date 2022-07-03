@@ -1,14 +1,16 @@
-import { Currency, ETHER, Token } from '@uniswap/sdk'
+import { Currency, ETHER, Token } from '@pancakeswap-libs/sdk'
 import React, { KeyboardEvent, RefObject, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import ReactGA from 'react-ga'
+import { useSelector } from 'react-redux'
 import { useTranslation } from 'react-i18next'
 import { FixedSizeList } from 'react-window'
 import { Text } from 'rebass'
 import { ThemeContext } from 'styled-components'
 import { useActiveWeb3React } from '../../hooks'
+import { AppState } from '../../state'
 import { useAllTokens, useToken } from '../../hooks/Tokens'
 import { useSelectedListInfo } from '../../state/lists/hooks'
-import { CloseIcon, LinkStyledButton, TYPE } from '../../theme'
+import { CloseIcon, LinkStyledButton, TYPE } from '../Shared'
 import { isAddress } from '../../utils'
 import Card from '../Card'
 import Column from '../Column'
@@ -22,6 +24,8 @@ import SortButton from './SortButton'
 import { useTokenComparator } from './sorting'
 import { PaddedColumn, SearchInput, Separator } from './styleds'
 import AutoSizer from 'react-virtualized-auto-sizer'
+import TranslatedText from '../TranslatedText'
+import { TranslateString } from '../../utils/translateTextHelpers'
 
 interface CurrencySearchProps {
   isOpen: boolean
@@ -72,6 +76,8 @@ export function CurrencySearch({
 
   const tokenComparator = useTokenComparator(invertSearchOrder)
 
+  const audioPlay = useSelector<AppState, AppState['user']['audioPlay']>(state => state.user.audioPlay)
+
   const filteredTokens: Token[] = useMemo(() => {
     if (isAddressSearch) return searchToken ? [searchToken] : []
     return filterTokens(Object.values(allTokens), searchQuery)
@@ -98,8 +104,14 @@ export function CurrencySearch({
     (currency: Currency) => {
       onCurrencySelect(currency)
       onDismiss()
+      if (audioPlay) {
+        // @ts-ignore
+        const audio = document.getElementById('bgMusic')
+        // @ts-ignore
+        audio && audio.play()
+      }
     },
-    [onDismiss, onCurrencySelect]
+    [onDismiss, onCurrencySelect, audioPlay]
   )
 
   // clear the input on open
@@ -137,13 +149,19 @@ export function CurrencySearch({
 
   const selectedListInfo = useSelectedListInfo()
 
+
   return (
     <Column style={{ width: '100%', flex: '1 1' }}>
       <PaddedColumn gap="14px">
         <RowBetween>
           <Text fontWeight={500} fontSize={16}>
-            Select a token
-            <QuestionHelper text="Find a token by searching for its name or symbol or by pasting its address below." />
+            <TranslatedText translationId={82}>Select a token</TranslatedText>
+            <QuestionHelper
+              text={TranslateString(
+                130,
+                'Find a token by searching for its name or symbol or by pasting its address below.'
+              )}
+            />
           </Text>
           <CloseIcon onClick={onDismiss} />
         </RowBetween>
@@ -161,7 +179,7 @@ export function CurrencySearch({
         )}
         <RowBetween>
           <Text fontSize={14} fontWeight={500}>
-            Token Name
+            <TranslatedText translationId={126}>Token name</TranslatedText>
           </Text>
           <SortButton ascending={invertSearchOrder} toggleSortOrder={() => setInvertSearchOrder(iso => !iso)} />
         </RowBetween>
@@ -185,30 +203,34 @@ export function CurrencySearch({
         </AutoSizer>
       </div>
 
-      <Separator />
-      <Card>
-        <RowBetween>
-          {selectedListInfo.current ? (
-            <Row>
-              {selectedListInfo.current.logoURI ? (
-                <ListLogo
-                  style={{ marginRight: 12 }}
-                  logoURI={selectedListInfo.current.logoURI}
-                  alt={`${selectedListInfo.current.name} list logo`}
-                />
+      {null && (
+        <>
+          <Separator />
+          <Card>
+            <RowBetween>
+              {selectedListInfo.current ? (
+                <Row>
+                  {selectedListInfo.current.logoURI ? (
+                    <ListLogo
+                      style={{ marginRight: 12 }}
+                      logoURI={selectedListInfo.current.logoURI}
+                      alt={`${selectedListInfo.current.name} list logo`}
+                    />
+                  ) : null}
+                  <TYPE.main id="currency-search-selected-list-name">{selectedListInfo.current.name}</TYPE.main>
+                </Row>
               ) : null}
-              <TYPE.main id="currency-search-selected-list-name">{selectedListInfo.current.name}</TYPE.main>
-            </Row>
-          ) : null}
-          <LinkStyledButton
-            style={{ fontWeight: 500, color: theme.text2, fontSize: 16 }}
-            onClick={onChangeList}
-            id="currency-search-change-list-button"
-          >
-            {selectedListInfo.current ? 'Change' : 'Select a list'}
-          </LinkStyledButton>
-        </RowBetween>
-      </Card>
+              <LinkStyledButton
+                style={{ fontWeight: 500, color: theme.colors.text2, fontSize: 16 }}
+                onClick={onChangeList}
+                id="currency-search-change-list-button"
+              >
+                {selectedListInfo.current ? 'Change' : 'Select a list'}
+              </LinkStyledButton>
+            </RowBetween>
+          </Card>
+        </>
+      )}
     </Column>
   )
 }

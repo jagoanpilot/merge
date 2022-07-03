@@ -1,4 +1,4 @@
-import { ChainId, Pair, Token } from '@uniswap/sdk'
+import { ChainId, Pair, Token } from '@pancakeswap-libs/sdk'
 import flatMap from 'lodash.flatmap'
 import { useCallback, useMemo } from 'react'
 import { shallowEqual, useDispatch, useSelector } from 'react-redux'
@@ -17,8 +17,10 @@ import {
   updateUserDeadline,
   updateUserExpertMode,
   updateUserSlippageTolerance,
-  toggleURLWarning
+  muteAudio,
+  unmuteAudio
 } from './actions'
+import { setThemeCache } from '../../utils/theme'
 
 function serializeToken(token: Token): SerializedToken {
   return {
@@ -51,19 +53,36 @@ export function useIsDarkMode(): boolean {
     }),
     shallowEqual
   )
-
   return userDarkMode === null ? matchesDarkMode : userDarkMode
 }
 
 export function useDarkModeManager(): [boolean, () => void] {
   const dispatch = useDispatch<AppDispatch>()
+  const { userDarkMode } = useSelector<AppState, { userDarkMode: boolean | null }>(
+    ({ user: { userDarkMode } }) => ({
+      userDarkMode
+    }),
+    shallowEqual
+  )
   const darkMode = useIsDarkMode()
 
   const toggleSetDarkMode = useCallback(() => {
-    dispatch(updateUserDarkMode({ userDarkMode: !darkMode }))
-  }, [darkMode, dispatch])
+    setThemeCache(!userDarkMode)
+    dispatch(updateUserDarkMode({ userDarkMode: !userDarkMode }))
+  }, [userDarkMode, dispatch])
 
   return [darkMode, toggleSetDarkMode]
+}
+
+export function useAudioModeManager(): [boolean, () => void] {
+  const dispatch = useDispatch<AppDispatch>()
+  const audioPlay = useSelector<AppState, AppState['user']['audioPlay']>(state => state.user.audioPlay)
+  const toggleSetAudioMode = useCallback(() => {
+    audioPlay ? dispatch(muteAudio()) : dispatch(unmuteAudio())
+    // dispatch(updateUserDarkMode({ userDarkMode: !darkMode }))
+  }, [audioPlay, dispatch])
+
+  return [audioPlay, toggleSetAudioMode]
 }
 
 export function useIsExpertMode(): boolean {
@@ -97,7 +116,7 @@ export function useUserSlippageTolerance(): [number, (slippage: number) => void]
   return [userSlippageTolerance, setUserSlippageTolerance]
 }
 
-export function useUserTransactionTTL(): [number, (slippage: number) => void] {
+export function useUserDeadline(): [number, (slippage: number) => void] {
   const dispatch = useDispatch<AppDispatch>()
   const userDeadline = useSelector<AppState, AppState['user']['userDeadline']>(state => {
     return state.user.userDeadline
@@ -161,22 +180,13 @@ export function usePairAdder(): (pair: Pair) => void {
   )
 }
 
-export function useURLWarningVisible(): boolean {
-  return useSelector((state: AppState) => state.user.URLWarningVisible)
-}
-
-export function useURLWarningToggle(): () => void {
-  const dispatch = useDispatch()
-  return useCallback(() => dispatch(toggleURLWarning()), [dispatch])
-}
-
 /**
  * Given two tokens return the liquidity token that represents its liquidity shares
  * @param tokenA one of the two tokens
  * @param tokenB the other token
  */
 export function toV2LiquidityToken([tokenA, tokenB]: [Token, Token]): Token {
-  return new Token(tokenA.chainId, Pair.getAddress(tokenA, tokenB), 18, 'UNI-V2', 'Uniswap V2')
+  return new Token(tokenA.chainId, Pair.getAddress(tokenA, tokenB), 18, 'Cake-LP', 'Pancake LPs')
 }
 
 /**

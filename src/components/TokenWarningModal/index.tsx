@@ -1,10 +1,10 @@
-import { Token } from '@uniswap/sdk'
+import { Token } from '@pancakeswap-libs/sdk'
 import { transparentize } from 'polished'
 import React, { useCallback, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { useActiveWeb3React } from '../../hooks'
 import { useAllTokens } from '../../hooks/Tokens'
-import { ExternalLink, TYPE } from '../../theme'
+import { ExternalLink, TYPE } from '../Shared'
 import { getEtherscanLink, shortenAddress } from '../../utils'
 import CurrencyLogo from '../CurrencyLogo'
 import Modal from '../Modal'
@@ -14,7 +14,7 @@ import { AlertTriangle } from 'react-feather'
 import { ButtonError } from '../Button'
 
 const Wrapper = styled.div<{ error: boolean }>`
-  background: ${({ theme }) => transparentize(0.6, theme.bg3)};
+  background: ${({ theme }) => transparentize(0.6, theme.colors.bg3)};
   padding: 0.75rem;
   border-radius: 20px;
 `
@@ -30,7 +30,7 @@ const WarningContainer = styled.div`
 `
 
 const StyledWarningIcon = styled(AlertTriangle)`
-  stroke: ${({ theme }) => theme.red2};
+  stroke: ${({ theme }) => theme.colors.red2};
 `
 
 interface TokenWarningCardProps {
@@ -74,7 +74,7 @@ function TokenWarningCard({ token }: TokenWarningCardProps) {
           </TYPE.main>
           {chainId && (
             <ExternalLink style={{ fontWeight: 400 }} href={getEtherscanLink(chainId, token.address, 'token')}>
-              <TYPE.blue title={token.address}>{shortenAddress(token.address)} (View on Etherscan)</TYPE.blue>
+              <TYPE.blue title={token.address}>{shortenAddress(token.address)} (View on BscScan)</TYPE.blue>
             </ExternalLink>
           )}
         </AutoColumn>
@@ -105,12 +105,12 @@ export default function TokenWarningModal({
             <TYPE.main color={'red2'}>Token imported</TYPE.main>
           </AutoRow>
           <TYPE.body color={'red2'}>
-            Anyone can create an ERC20 token on Ethereum with <em>any</em> name, including creating fake versions of
+            Anyone can create an BEP20 token on BSC with <em>any</em> name, including creating fake versions of
             existing tokens and tokens that claim to represent projects that do not have a token.
           </TYPE.body>
           <TYPE.body color={'red2'}>
             This interface can load arbitrary tokens by token addresses. Please take extra caution and do your research
-            when interacting with arbitrary ERC20 tokens.
+            when interacting with arbitrary BEP20 tokens.
           </TYPE.body>
           <TYPE.body color={'red2'}>
             If you purchase an arbitrary token, <strong>you may be unable to sell it back.</strong>

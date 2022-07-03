@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
 import { Link, RouteComponentProps, withRouter } from 'react-router-dom'
-import { Token, TokenAmount, WETH } from '@uniswap/sdk'
+import { Token, TokenAmount, WETH } from '@pancakeswap-libs/sdk'
 
 import { Text } from 'rebass'
 import { AutoColumn } from '../Column'
@@ -37,7 +37,7 @@ function V1PositionCard({ token, V1LiquidityBalance }: PositionCardProps) {
               px="0.75rem"
               py="0.25rem"
               style={{ borderRadius: '1rem' }}
-              backgroundColor={theme.yellow1}
+              backgroundColor={theme.colors.yellow1}
               color={'black'}
             >
               V1

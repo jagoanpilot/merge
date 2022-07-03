@@ -13,7 +13,8 @@ import {
   updateUserExpertMode,
   updateUserSlippageTolerance,
   updateUserDeadline,
-  toggleURLWarning
+  muteAudio,
+  unmuteAudio
 } from './actions'
 
 const currentTimestamp = () => new Date().getTime()
@@ -47,7 +48,8 @@ export interface UserState {
   }
 
   timestamp: number
-  URLWarningVisible: boolean
+
+  audioPlay: boolean
 }
 
 function pairKey(token0Address: string, token1Address: string) {
@@ -63,7 +65,7 @@ export const initialState: UserState = {
   tokens: {},
   pairs: {},
   timestamp: currentTimestamp(),
-  URLWarningVisible: true
+  audioPlay: true
 }
 
 export default createReducer(initialState, builder =>
@@ -132,7 +134,10 @@ export default createReducer(initialState, builder =>
       }
       state.timestamp = currentTimestamp()
     })
-    .addCase(toggleURLWarning, state => {
-      state.URLWarningVisible = !state.URLWarningVisible
+    .addCase(muteAudio, state => {
+      state.audioPlay = false
+    })
+    .addCase(unmuteAudio, state => {
+      state.audioPlay = true
     })
 )

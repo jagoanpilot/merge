@@ -1,9 +1,11 @@
-import { Currency } from '@uniswap/sdk'
+import { Currency } from '@pancakeswap-libs/sdk'
 import React, { useCallback, useEffect, useState } from 'react'
 import ReactGA from 'react-ga'
 import useLast from '../../hooks/useLast'
+import { useSelectedListUrl } from '../../state/lists/hooks'
 import Modal from '../Modal'
 import { CurrencySearch } from './CurrencySearch'
+// import ListIntroduction from './ListIntroduction'
 import { ListSelect } from './ListSelect'
 
 interface CurrencySearchModalProps {
@@ -54,11 +56,27 @@ export default function CurrencySearchModal({
     })
     setListView(false)
   }, [])
+  // const handleSelectListIntroduction = useCallback(() => {
+  //   setListView(true)
+  // }, [])
+
+  const selectedListUrl = useSelectedListUrl()
+  const noListSelected = !selectedListUrl
 
   return (
-    <Modal isOpen={isOpen} onDismiss={onDismiss} maxHeight={80} minHeight={listView ? 40 : 80}>
+    <Modal isOpen={isOpen} onDismiss={onDismiss} maxHeight={90} minHeight={listView ? 40 : noListSelected ? 0 : 80}>
       {listView ? (
         <ListSelect onDismiss={onDismiss} onBack={handleClickBack} />
+      ) : noListSelected ? (
+        <CurrencySearch
+          isOpen={isOpen}
+          onDismiss={onDismiss}
+          onCurrencySelect={handleCurrencySelect}
+          onChangeList={handleClickChangeList}
+          selectedCurrency={selectedCurrency}
+          otherSelectedCurrency={otherSelectedCurrency}
+          showCommonBases={false}
+        />
       ) : (
         <CurrencySearch
           isOpen={isOpen}
@@ -67,7 +85,7 @@ export default function CurrencySearchModal({
           onChangeList={handleClickChangeList}
           selectedCurrency={selectedCurrency}
           otherSelectedCurrency={otherSelectedCurrency}
-          showCommonBases={showCommonBases}
+          showCommonBases={false}
         />
       )}
     </Modal>

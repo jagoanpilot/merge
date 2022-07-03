@@ -1,31 +1,31 @@
-import React, { useContext, useRef, useState } from 'react'
+import React, { useRef, useContext, useState } from 'react'
 import { Settings, X } from 'react-feather'
-import { Text } from 'rebass'
-import styled, { ThemeContext } from 'styled-components'
+import styled from 'styled-components'
 import { useOnClickOutside } from '../../hooks/useOnClickOutside'
-import { ApplicationModal } from '../../state/application/actions'
-import { useModalOpen, useToggleSettingsMenu } from '../../state/application/hooks'
 import {
-  useDarkModeManager,
+  useUserSlippageTolerance,
   useExpertModeManager,
-  useUserTransactionTTL,
-  useUserSlippageTolerance
+  useUserDeadline,
+  useAudioModeManager
 } from '../../state/user/hooks'
-import { TYPE } from '../../theme'
-import { ButtonError } from '../Button'
-import { AutoColumn } from '../Column'
-import Modal from '../Modal'
-import QuestionHelper from '../QuestionHelper'
-import { RowBetween, RowFixed } from '../Row'
-import Toggle from '../Toggle'
 import TransactionSettings from '../TransactionSettings'
+import { RowFixed, RowBetween } from '../Row'
+import { TYPE } from '../Shared'
+import Toggle from '../Toggle'
+import { ThemeContext } from 'styled-components'
+import { AutoColumn } from '../Column'
+import { ButtonError } from '../Button'
+import { useSettingsMenuOpen, useToggleSettingsMenu } from '../../state/application/hooks'
+import { Text } from 'rebass'
+import Modal from '../Modal'
+import TranslatedText from '../TranslatedText'
 
 const StyledMenuIcon = styled(Settings)`
   height: 20px;
   width: 20px;
 
   > * {
-    stroke: ${({ theme }) => theme.text1};
+    stroke: ${({ theme }) => theme.colors.text1};
   }
 `
 
@@ -37,7 +37,7 @@ const StyledCloseIcon = styled(X)`
   }
 
   > * {
-    stroke: ${({ theme }) => theme.text1};
+    stroke: ${({ theme }) => theme.colors.text1};
   }
 `
 
@@ -50,7 +50,7 @@ const StyledMenuButton = styled.button`
   margin: 0;
   padding: 0;
   height: 35px;
-  background-color: ${({ theme }) => theme.bg3};
+  background-color: ${({ theme }) => theme.colors.bg3};
 
   padding: 0.15rem 0.5rem;
   border-radius: 0.5rem;
@@ -59,7 +59,7 @@ const StyledMenuButton = styled.button`
   :focus {
     cursor: pointer;
     outline: none;
-    background-color: ${({ theme }) => theme.bg4};
+    background-color: ${({ theme }) => theme.colors.bg4};
   }
 
   svg {
@@ -85,15 +85,18 @@ const StyledMenu = styled.div`
 
 const MenuFlyout = styled.span`
   min-width: 20.125rem;
-  background-color: ${({ theme }) => theme.bg2};
+  background-color: ${({ theme }) => theme.colors.bg1};
   box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.01), 0px 4px 8px rgba(0, 0, 0, 0.04), 0px 16px 24px rgba(0, 0, 0, 0.04),
     0px 24px 32px rgba(0, 0, 0, 0.01);
-  border-radius: 12px;
+
+  border: 1px solid ${({ theme }) => theme.colors.bg3};
+
+  border-radius: 0.5rem;
   display: flex;
   flex-direction: column;
   font-size: 1rem;
   position: absolute;
-  top: 4rem;
+  top: 3rem;
   right: 0rem;
   z-index: 100;
 
@@ -101,17 +104,12 @@ const MenuFlyout = styled.span`
     min-width: 18.125rem;
     right: -46px;
   `};
-
-  ${({ theme }) => theme.mediaWidth.upToMedium`
-    min-width: 18.125rem;
-    top: -22rem;
-  `};
 `
 
 const Break = styled.div`
   width: 100%;
   height: 1px;
-  background-color: ${({ theme }) => theme.bg3};
+  background-color: ${({ theme }) => theme.colors.bg3};
 `
 
 const ModalContentWrapper = styled.div`
@@ -119,23 +117,23 @@ const ModalContentWrapper = styled.div`
   align-items: center;
   justify-content: center;
   padding: 2rem 0;
-  background-color: ${({ theme }) => theme.bg2};
+  background-color: ${({ theme }) => theme.colors.bg2};
   border-radius: 20px;
 `
 
 export default function SettingsTab() {
   const node = useRef<HTMLDivElement>()
-  const open = useModalOpen(ApplicationModal.SETTINGS)
+  const open = useSettingsMenuOpen()
   const toggle = useToggleSettingsMenu()
 
   const theme = useContext(ThemeContext)
   const [userSlippageTolerance, setUserslippageTolerance] = useUserSlippageTolerance()
 
-  const [ttl, setTtl] = useUserTransactionTTL()
+  const [deadline, setDeadline] = useUserDeadline()
 
   const [expertMode, toggleExpertMode] = useExpertModeManager()
 
-  const [darkMode, toggleDarkMode] = useDarkModeManager()
+  const [audioMode, toggleSetAudioMode] = useAudioModeManager()
 
   // show confirmation view before turning on
   const [showConfirmation, setShowConfirmation] = useState(false)
@@ -184,59 +182,37 @@ export default function SettingsTab() {
       </Modal>
       <StyledMenuButton onClick={toggle} id="open-settings-dialog-button">
         <StyledMenuIcon />
-        {expertMode ? (
+        {expertMode && (
           <EmojiWrapper>
             <span role="img" aria-label="wizard-icon">
               🧙
             </span>
           </EmojiWrapper>
-        ) : null}
+        )}
       </StyledMenuButton>
       {open && (
         <MenuFlyout>
           <AutoColumn gap="md" style={{ padding: '1rem' }}>
             <Text fontWeight={600} fontSize={14}>
-              Transaction Settings
+              <TranslatedText translationId={86}>Transaction Settings</TranslatedText>
             </Text>
             <TransactionSettings
               rawSlippage={userSlippageTolerance}
               setRawSlippage={setUserslippageTolerance}
-              deadline={ttl}
-              setDeadline={setTtl}
+              deadline={deadline}
+              setDeadline={setDeadline}
             />
             <Text fontWeight={600} fontSize={14}>
-              Interface Settings
+              <TranslatedText translationId={94}>Interface Settings</TranslatedText>
             </Text>
+
             <RowBetween>
               <RowFixed>
-                <TYPE.black fontWeight={400} fontSize={14} color={theme.text2}>
-                  Toggle Expert Mode
-                </TYPE.black>
-                <QuestionHelper text="Bypasses confirmation modals and allows high slippage trades. Use at your own risk." />
-              </RowFixed>
-              <Toggle
-                id="toggle-expert-mode-button"
-                isActive={expertMode}
-                toggle={
-                  expertMode
-                    ? () => {
-                        toggleExpertMode()
-                        setShowConfirmation(false)
-                      }
-                    : () => {
-                        toggle()
-                        setShowConfirmation(true)
-                      }
-                }
-              />
-            </RowBetween>
-            <RowBetween>
-              <RowFixed>
-                <TYPE.black fontWeight={400} fontSize={14} color={theme.text2}>
-                  Toggle Dark Mode
+                <TYPE.black fontWeight={400} fontSize={14} color={theme.colors.text2}>
+                  <TranslatedText translationId={96}>Toggle Audio Mode</TranslatedText>
                 </TYPE.black>
               </RowFixed>
-              <Toggle isActive={darkMode} toggle={toggleDarkMode} />
+              <Toggle isActive={audioMode} toggle={toggleSetAudioMode} />
             </RowBetween>
           </AutoColumn>
         </MenuFlyout>

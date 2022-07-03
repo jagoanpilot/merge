@@ -3,6 +3,7 @@ import { DEFAULT_LIST_OF_LISTS, DEFAULT_TOKEN_LIST_URL } from '../../constants/l
 import { updateVersion } from '../global/actions'
 import { fetchTokenList, acceptListUpdate, addList, removeList, selectList } from './actions'
 import reducer, { ListsState } from './reducer'
+import PANCAKESWAP_DEFAULT_TOKEN_LIST from '../../constants/token/pancakeswap.json'
 
 const STUB_TOKEN_LIST = {
   name: '',
@@ -305,7 +306,7 @@ describe('list reducer', () => {
         selectedListUrl: undefined
       })
     })
-    it('selects the default list if removed list was selected', () => {
+    it('unselects the list if selected', () => {
       store = createStore(reducer, {
         byUrl: {
           'fake-url': {
@@ -320,7 +321,7 @@ describe('list reducer', () => {
       store.dispatch(removeList('fake-url'))
       expect(store.getState()).toEqual({
         byUrl: {},
-        selectedListUrl: 'tokens.uniswap.eth'
+        selectedListUrl: undefined
       })
     })
   })
@@ -448,7 +449,7 @@ describe('list reducer', () => {
           if (url === DEFAULT_TOKEN_LIST_URL) {
             expect(s.byUrl[url]).toEqual({
               error: null,
-              current: null,
+              current: PANCAKESWAP_DEFAULT_TOKEN_LIST,
               loadingRequestId: null,
               pendingUpdate: null
             })
@@ -464,17 +465,6 @@ describe('list reducer', () => {
       })
       it('sets initialized lists', () => {
         expect(store.getState().lastInitializedDefaultListOfLists).toEqual(DEFAULT_LIST_OF_LISTS)
-      })
-      it('sets selected list', () => {
-        expect(store.getState().selectedListUrl).toEqual(DEFAULT_TOKEN_LIST_URL)
-      })
-      it('default list is initialized', () => {
-        expect(store.getState().byUrl[DEFAULT_TOKEN_LIST_URL]).toEqual({
-          error: null,
-          current: null,
-          loadingRequestId: null,
-          pendingUpdate: null
-        })
       })
     })
     describe('initialized with a different set of lists', () => {
@@ -536,17 +526,6 @@ describe('list reducer', () => {
 
       it('sets initialized lists', () => {
         expect(store.getState().lastInitializedDefaultListOfLists).toEqual(DEFAULT_LIST_OF_LISTS)
-      })
-      it('sets default list to selected list', () => {
-        expect(store.getState().selectedListUrl).toEqual(DEFAULT_TOKEN_LIST_URL)
-      })
-      it('default list is initialized', () => {
-        expect(store.getState().byUrl[DEFAULT_TOKEN_LIST_URL]).toEqual({
-          error: null,
-          current: null,
-          loadingRequestId: null,
-          pendingUpdate: null
-        })
       })
     })
   })

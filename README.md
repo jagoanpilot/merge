@@ -1,65 +1,100 @@
-# Uniswap Interface
 
-[![Tests](https://github.com/Uniswap/uniswap-interface/workflows/Tests/badge.svg)](https://github.com/Uniswap/uniswap-interface/actions?query=workflow%3ATests)
-[![Styled With Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://prettier.io/)
 
-An open source interface for Uniswap -- a protocol for decentralized exchange of Ethereum tokens.
+## Intro
 
-- Website: [uniswap.org](https://uniswap.org/)
-- Interface: [app.uniswap.org](https://app.uniswap.org)
-- Docs: [uniswap.org/docs/](https://uniswap.org/docs/)
-- Twitter: [@UniswapProtocol](https://twitter.com/UniswapProtocol)
-- Reddit: [/r/Uniswap](https://www.reddit.com/r/Uniswap/)
-- Email: [contact@uniswap.org](mailto:contact@uniswap.org)
-- Discord: [Uniswap](https://discord.gg/Y7TF6QA)
-- Whitepaper: [Link](https://hackmd.io/C-DvwDSfSxuh-Gd4WKE_ig)
+[JpG-TokenSwap](https://jagoan-pilot.online/) is an automated market maker (“**AMM**”) that allows two tokens to be exchanged on the [Binance Smart Chain](https://www.binance.org/en/smartChain) (BSC). It is fast, cheap, and allows anyone to participate.
 
-## Accessing the Uniswap Interface
+##
 
-To access the Uniswap Interface, use an IPFS gateway link from the
-[latest release](https://github.com/Uniswap/uniswap-interface/releases/latest), 
-or visit [app.uniswap.org](https://app.uniswap.org).
+This repo is responsible for the **exchange/pool** interfaace of the AMM: [dex.jagoan-pilot.online](https://dex.jagoan-pilot.online/)
+## Dependencies  Install On Ubuntu 18.04
+# Yarn
+# Nodejs V 10.x
+# Dependencies Cypress
+# Nginx
 
-## Listing a token
 
-Please see the
-[@uniswap/default-token-list](https://github.com/uniswap/default-token-list) 
-repository.
+#1 install yarn
 
-## Development
+```js
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+```
 
-### Install Dependencies
+```js
+echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.listecho "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+```
+
+```js
+sudo apt update
+sudo apt install yarn
+```
+
+#2 Nodejs
 
 ```bash
+sudo apt-get install build-essential libsodium-dev npm libboost-all-dev libgmp-dev
+sudo apt install nodejs node-gyp libssl1.0-dev -y
+sudo apt install npm -y
+sudo npm install n -g
+sudo n v10
+sudo apt purge nodejs npm -y
+sudo ln -sf /usr/local/bin/node /usr/bin/node 
+sudo ln -sf /usr/local/bin/npm /usr/bin/npm 
+```
+
+#3 Dependencies Cypress
+
+```js
+apt-get install libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
+```
+
+#4 Nginx
+
+https://www.digitalocean.com/community/questions/how-do-i-point-my-custom-domain-to-my-ip-port-41-111-20-36-8080
+
+## Run locally
+
+Install packages
+
+```js
 yarn
 ```
 
-### Run
+Run application
 
-```bash
-yarn start
+```js
+yarn run
 ```
 
-### Configuring the environment (optional)
+## Change BSC network
 
-To have the interface default to a different network when a wallet is not connected:
+To change the BSC network from test net, modify the `REACT_APP_CHAIN_ID` value in `.env`.
 
-1. Make a copy of `.env` named `.env.local`
-2. Change `REACT_APP_NETWORK_ID` to `"{YOUR_NETWORK_ID}"`
-3. Change `REACT_APP_NETWORK_URL` to e.g. `"https://{YOUR_NETWORK_ID}.infura.io/v3/{YOUR_INFURA_KEY}"` 
+- MAIN NET `56`
+- TEST NET `97`
 
-Note that the interface only works on testnets where both 
-[Uniswap V2](https://uniswap.org/docs/v2/smart-contracts/factory/) and 
-[multicall](https://github.com/makerdao/multicall) are deployed.
-The interface will not work on other networks.
+## Run integration tets
 
-## Contributions
+Firstly, if you need to install cypress
 
-**Please open all pull requests against the `master` branch.** 
-CI checks will run against all PRs.
+```js
+yarn cypress install
+```
 
-## Accessing Uniswap Interface V1
+Then to run the Cypress suite in CLI
 
-The Uniswap Interface supports swapping against, and migrating or removing liquidity from Uniswap V1. However,
-if you would like to use Uniswap V1, the Uniswap V1 interface for mainnet and testnets is accessible via IPFS gateways 
-linked from the [v1.0.0 release](https://github.com/Uniswap/uniswap-interface/releases/tag/v1.0.0).
+```js
+yarn cypress run
+```
+
+Or, to run Cypress with its GUI
+
+```js
+yarn cypress open
+```
+
+# Localisation
+
+_In order for the Crowdin API queries to work - you will need `REACT_APP_CROWDIN_APIKEY` & `REACT_APP_CROWDIN_PROJECTID` env variables set in your root `.env.development.local` file - please contact a dev if you need these._
+
+## Forked PancakeSwap

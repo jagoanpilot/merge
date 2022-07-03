@@ -4,6 +4,7 @@ import { TokenList } from '@uniswap/token-lists/dist/types'
 import { DEFAULT_LIST_OF_LISTS, DEFAULT_TOKEN_LIST_URL } from '../../constants/lists'
 import { updateVersion } from '../global/actions'
 import { acceptListUpdate, addList, fetchTokenList, removeList, selectList } from './actions'
+import DEFAULT_LIST from '../../constants/token/pancakeswap.json'
 
 export interface ListsState {
   readonly byUrl: {
@@ -19,9 +20,7 @@ export interface ListsState {
   readonly selectedListUrl: string | undefined
 }
 
-type ListState = ListsState['byUrl'][string]
-
-const NEW_LIST_STATE: ListState = {
+const NEW_LIST_STATE: ListsState['byUrl'][string] = {
   error: null,
   current: null,
   loadingRequestId: null,
@@ -36,7 +35,13 @@ const initialState: ListsState = {
     ...DEFAULT_LIST_OF_LISTS.reduce<Mutable<ListsState['byUrl']>>((memo, listUrl) => {
       memo[listUrl] = NEW_LIST_STATE
       return memo
-    }, {})
+    }, {}),
+    [DEFAULT_TOKEN_LIST_URL]: {
+      error: null,
+      current: DEFAULT_LIST,
+      loadingRequestId: null,
+      pendingUpdate: null
+    }
   },
   selectedListUrl: DEFAULT_TOKEN_LIST_URL
 }
@@ -110,7 +115,7 @@ export default createReducer(initialState, builder =>
         delete state.byUrl[url]
       }
       if (state.selectedListUrl === url) {
-        state.selectedListUrl = url === DEFAULT_TOKEN_LIST_URL ? Object.keys(state.byUrl)[0] : DEFAULT_TOKEN_LIST_URL
+        state.selectedListUrl = Object.keys(state.byUrl)[0]
       }
     })
     .addCase(acceptListUpdate, (state, { payload: url }) => {
@@ -127,7 +132,7 @@ export default createReducer(initialState, builder =>
       // state loaded from localStorage, but new lists have never been initialized
       if (!state.lastInitializedDefaultListOfLists) {
         state.byUrl = initialState.byUrl
-        state.selectedListUrl = DEFAULT_TOKEN_LIST_URL
+        state.selectedListUrl = undefined
       } else if (state.lastInitializedDefaultListOfLists) {
         const lastInitializedSet = state.lastInitializedDefaultListOfLists.reduce<Set<string>>(
           (s, l) => s.add(l),
@@ -149,12 +154,5 @@ export default createReducer(initialState, builder =>
       }
 
       state.lastInitializedDefaultListOfLists = DEFAULT_LIST_OF_LISTS
-
-      if (!state.selectedListUrl) {
-        state.selectedListUrl = DEFAULT_TOKEN_LIST_URL
-        if (!state.byUrl[DEFAULT_TOKEN_LIST_URL]) {
-          state.byUrl[DEFAULT_TOKEN_LIST_URL] = NEW_LIST_STATE
-        }
-      }
     })
 )
